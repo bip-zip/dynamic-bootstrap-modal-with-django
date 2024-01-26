@@ -17,7 +17,9 @@
                     <h5>{{i.name}}</h5>
                     <p>Capacity: {{i.vehicle_capacity}}</p>
                     <p>Remaing Space: {{i.remaining_space}}</p>
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewModal">
+                    <button class="btn btn-sm btn-primary"
+                    data-bs-target="#viewModal" data-id="{{i.id}}"
+                    data-bs-toggle="modal" >
                         See details
                     </button>
 
@@ -37,23 +39,64 @@
 
     <!-- Modal -->
         <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <h1 class="modal-title fs-5" >Parking Lot: <span id="modalTopic"></span></h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                ...
+                    <div id="modalVehicles" class="d-flex justify-content-between">
+                       
+                      </div>
                 </div>
                 <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+
                 </div>
             </div>
             </div>
         </div>
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-  </body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          
+          var viewButtons = document.querySelectorAll('[data-bs-toggle="modal"][data-bs-target^="#"]');
+          viewButtons.forEach(function (viewButton) {
+            viewButton.addEventListener("click", function () {
+              var targetModalId = viewButton.getAttribute("data-id");
+              
+              $.ajax({
+                url: "{% url 'modalapp:get_modal_content'%}",
+                data: { id: targetModalId },
+                success: function (data) {
+               
+                  var modalData = data;
+                  
+            
+      
+                  // Update modal content with the fetched data
+                  $('#viewModal #modalTopic').text(modalData.name);
+                  if(modalData.vehicles.length===0){
+                    $('#viewModal #modalVehicles').html("<p class='text-center text-muted'>No Vehicles</p>");
+                    return
+                
+                  }
+                  var vehicleContent = '';
+                  modalData.vehicles.forEach(function (vehicle, index) {
+                    vehicleContent += '<h6>' + (index + 1) + '. ' + vehicle.vehicle + '</h6>';
+                    vehicleContent += '<div class="ms-4">' + vehicle.vehicle_no + '</div>';
+                    vehicleContent += '<small class="text-right">' + vehicle.entry_time + ' <i> ';
+                    
+                  });
+      
+                  $('#viewModal #modalVehicles').html(vehicleContent);
+                }
+              });
+            });
+          });
+        });
+      </script>
+</body>
 </html>

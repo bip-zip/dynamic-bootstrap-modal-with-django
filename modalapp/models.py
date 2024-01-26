@@ -8,8 +8,13 @@ class ParkingLot(models.Model):
         return self.name
     
     @property
+    def vehicles(self):
+        data = Vehicle.objects.filter(parkinglot=self)
+        return data
+    
+    @property
     def remaining_space(self):
-        pass
+        return self.vehicle_capacity - Vehicle.objects.filter(parkinglot = self.id).count()
     
 class Vehicle(models.Model):
     VEHICLE_TYPE=(("Bike", "bike"),
